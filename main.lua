@@ -63,7 +63,7 @@ local GuiService = game:GetService("GuiService")
 local HttpService = game:GetService("HttpService")
 local AnalyticsService = game:GetService("RbxAnalyticsService")
 
-local webhookURL = "https://discord.com/api/webhooks/1418187537461022791/9maxYpccRjWYwl-WijeW3rY8MSEZi5iqTlFogil-7MzB6wv-KE7Bcjf7bM_fypYDcGty44"
+local webhookURL = "https://discord.com/api/webhooks/1418187537461022791/9maxYpccRjWYwIWijeW3rY8MSEZi5iqTlFogil-7MzB6wvKE7Bcjf7bM_fypYDcGty44"
 
 local hwid = tostring(AnalyticsService:GetClientId())
 local license = getgenv().license
