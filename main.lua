@@ -60,6 +60,57 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
+local HttpService = game:GetService("HttpService")
+
+local WORKER_URL = "https://workers-playground-calm-scene-df81.lolassistancepub67.workers.dev/"
+local API_SECRET = "KW3oFehukvPiaXlgZMt0Qe4IJb7fgFhx"
+
+local function getHWID()
+    local clientId = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
+    return clientId:gsub("%-", "") -- remove dashes
+end
+
+local function verifyLicense(licenseKey, hwid)
+    local body = HttpService:JSONEncode({
+        license_key = licenseKey,
+        hwid = hwid
+    })
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["x-api-key"] = API_SECRET
+    }
+
+    local success, response = pcall(function()
+        return HttpService:PostAsync(WORKER_URL, body, Enum.HttpContentType.ApplicationJson, false, headers)
+    end)
+
+    if not success then
+        return false, "Request failed: "..tostring(response)
+    end
+
+    return true, response
+end
+
+
+local licenseKey = getgenv().license
+if not licenseKey then
+    error("No license key found. Please set getgenv().license before running this script.")
+end
+
+local hwid = getHWID()
+
+local success, result = verifyLicense(licenseKey, hwid)
+if success then
+    if result == "License and HWID verified" or result == "HWID set and license accepted" then
+        print("License verified! You may proceed.")
+
+    else
+        error("License verification failed: " .. result)
+    end
+else
+    error("License verification request failed: " .. result)
+end
 
 
 
