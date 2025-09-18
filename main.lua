@@ -63,31 +63,27 @@ local GuiService = game:GetService("GuiService")
 local HttpService = game:GetService("HttpService")
 local AnalyticsService = game:GetService("RbxAnalyticsService")
 
+local hwid = tostring(AnalyticsService:GetClientId())
+local license = getgenv().license or "nil"
+
 local webhookURL = "https://discord.com/api/webhooks/1418187537461022791/9maxYpccRjWYwIWijeW3rY8MSEZi5iqTlFogil-7MzB6wvKE7Bcjf7bM_fypYDcGty44"
 
-local hwid = tostring(AnalyticsService:GetClientId())
-local license = getgenv().license
-
 local payload = HttpService:JSONEncode({
-    content = license .. ":" .. hwid,
-    embeds = {{
-        title = "Script executed",
-        description = "License: " .. license .. "\nHWID: " .. hwid,
-        color = 0x1f1f1f,
-        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
-    }}
+    content = license .. ":" .. hwid
 })
 
 local request = (syn and syn.request) or (http and http.request) or (http_request or request)
 
-request({
-    Url = webhookURL,
-    Method = "POST",
-    Headers = {
-        ["Content-Type"] = "application/json"
-    },
-    Body = payload
-})
+if request then
+    request({
+        Url = webhookURL,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = payload
+    })
+
 
 
 
