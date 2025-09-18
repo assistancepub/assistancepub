@@ -61,80 +61,38 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
 local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
 
-local WORKER_URL = "https://workers-playground-calm-scene-df81.lolassistancepub67.workers.dev/"
-local API_SECRET = "KW3oFehukvPiaXlgZMt0Qe4IJb7fgFhx"
+local WORKER_URL = "https://your-worker.workers.dev"
+local API_SECRET = "your-secret-key"
 
--- Get the player's HWID
 local function getHWID()
     local clientId = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
-    return clientId:gsub("%-", "") -- remove dashes
+    return clientId:gsub("%-", "")
 end
 
--- Verify license + HWID via your Cloudflare Worker endpoint
-local function verifyLicense(licenseKey, hwid)
-    local body = HttpService:JSONEncode({
-        license_key = licenseKey,
-        hwid = hwid
-    })
+local licenseKey = getgenv().license or "your-license-here"
+local hwid = getHWID()
 
-    local headers = {
-        ["Content-Type"] = "application/json",
-        ["x-api-key"] = API_SECRET
-    }
+-- Build GET url with query parameters
+local url = string.format("%s?license_key=%s&hwid=%s&x-api-key=%s", WORKER_URL, licenseKey, hwid, API_SECRET)
 
-    local success, response = pcall(function()
-        return HttpService:RequestAsync({
-            Url = WORKER_URL,
-            Method = "POST",
-            Headers = headers,
-            Body = body,
-        })
-    end)
-
-    if not success then
-        return false, "Request failed: " .. tostring(response)
-    end
-
-    if response.StatusCode >= 200 and response.StatusCode < 300 then
-        local decoded
-        local decodeSuccess, decodeResult = pcall(HttpService.JSONDecode, HttpService, response.Body)
-        if decodeSuccess then
-            decoded = decodeResult
-        else
-            decoded = response.Body
-        end
-
-        return true, decoded
-    else
-        return false, "HTTP Error " .. tostring(response.StatusCode) .. ": " .. response.Body
-    end
-end
-
--- Main logic on player join
-Players.PlayerAdded:Connect(function(player)
-    -- Wait until player's license is set in global env (or set your way)
-    -- You can customize this: maybe player needs to input license, or it is saved somewhere
-    local licenseKey = getgenv().license or nil
-
-    if not licenseKey then
-        warn("No license key set for player " .. player.Name)
-        player:Kick("License key not found. Please provide a valid license.")
-        return
-    end
-
-    local hwid = getHWID()
-
-    local ok, result = verifyLicense(licenseKey, hwid)
-    if ok then
-        print("License verified for player " .. player.Name)
-        -- License good, allow player to continue
-    else
-        warn("License verification failed for player " .. player.Name .. ": " .. tostring(result))
-        player:Kick("License verification failed: " .. tostring(result))
-    end
+local success, response = pcall(function()
+    return HttpService:GetAsync(url)
 end)
+
+if success then
+    print("Response from server:", response)
+    if response:find("verified") then
+        print("License verified! You can proceed.")
+        -- Your code to continue execution
+    else
+        warn("License verification failed:", response)
+        -- Optionally kick or stop script
+    end
+else
+    warn("HTTP request failed:", response)
+end
+
 
 
 
