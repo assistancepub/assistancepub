@@ -60,29 +60,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
-local HttpService = game:GetService("HttpService")
-local AnalyticsService = game:GetService("RbxAnalyticsService")
 
-local hwid = tostring(AnalyticsService:GetClientId())
-local license = getgenv().license or "nil"
-
-local webhookURL = "https://discord.com/api/webhooks/1418187537461022791/9maxYpccRjWYwIWijeW3rY8MSEZi5iqTlFogil-7MzB6wvKE7Bcjf7bM_fypYDcGty44"
-
-local payload = HttpService:JSONEncode({
-    content = license .. ":" .. hwid
-})
-
-local request = (syn and syn.request) or (http and http.request) or (http_request or request)
-
-if request then
-    request({
-        Url = webhookURL,
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = payload
-    })
 
 
 
