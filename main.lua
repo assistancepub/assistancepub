@@ -71,6 +71,7 @@ local function getHWID()
 end
 
 local function verifyLicense(licenseKey, hwid)
+    local HttpService = game:GetService("HttpService")
     local body = HttpService:JSONEncode({
         license_key = licenseKey,
         hwid = hwid
@@ -82,35 +83,25 @@ local function verifyLicense(licenseKey, hwid)
     }
 
     local success, response = pcall(function()
-        return HttpService:PostAsync(WORKER_URL, body, Enum.HttpContentType.ApplicationJson, false, headers)
+        return HttpService:RequestAsync({
+            Url = WORKER_URL,
+            Method = "POST",
+            Headers = headers,
+            Body = body,
+        })
     end)
 
     if not success then
-        return false, "Request failed: "..tostring(response)
+        return false, "Request failed: " .. tostring(response)
     end
 
-    return true, response
-end
-
-
-local licenseKey = getgenv().license
-if not licenseKey then
-    error("No license key found. Please set getgenv().license before running this script.")
-end
-
-local hwid = getHWID()
-
-local success, result = verifyLicense(licenseKey, hwid)
-if success then
-    if result == "License and HWID verified" or result == "HWID set and license accepted" then
-        print("License verified! You may proceed.")
-
+    if response.Success then
+        return true, response.Body
     else
-        error("License verification failed: " .. result)
+        return false, "HTTP Error: " .. tostring(response.StatusCode)
     end
-else
-    error("License verification request failed: " .. result)
 end
+
 
 
 
